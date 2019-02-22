@@ -2,17 +2,32 @@
 
 import os #建立本地目录使用
 import time #写了一个1秒延时
+import socket
 
 a = 1 #起始章节
 b = 1 #起始页面
 c = 271 #定义总章节，当大于此章节循环跳出
 errorcode = 200 #先定义正常代码
+socket.setdefaulttimeout(12) #设置默认超时时间s
 
 #定义下载方法方便调用
 def picdownld():
     os.makedirs(folder, exist_ok=True)
     from urllib.request import urlretrieve
-    urlretrieve(IMAGE_URL, picname)  
+    try:
+        urlretrieve(IMAGE_URL, picname)  #如果超时将进行两次循环，均失败则程序结束
+    except socket.timeout:
+        count = 1
+        while count < 3:
+            try:
+                print(str(count) + 'Reloading')
+                urlretrieve(IMAGE_URL, picname)
+                break
+            except socket.timeout:               
+                print(str(count) + 'Reload fail')
+                count += 1
+        if count == 3:
+            print('download fail, pls try again')
 
 while b < 100:
 
